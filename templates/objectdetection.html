@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-Way Violation Detection</title>
+    
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            width: 100%;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Container */
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-top: 80px; /* Below navbar */
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        /* File Input */
+        input[type="file"] {
+            display: block;
+            margin: 15px auto;
+            padding: 10px;
+            border: 2px dashed #928dab;
+            border-radius: 5px;
+            background: #f9f9f9;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        button, .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            margin-top: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover, .btn:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Image Preview */
+        .preview {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .preview img {
+            max-width: 200px;
+            display: none;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+
+        /* Result */
+        .result {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result img {
+            max-width: 100%;
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .message {
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">🚦 Smart Violation System</div>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/history">📜 History</a>
+            <a href="/settings">⚙️ Settings</a>
+            <a href="login.html">🔒 Logout</a>
+        </div>
+    </div>
+
+    <!-- object Violation Detection Form -->
+    <div class="container">
+        <h1>OBJECT DETECTION</h1>
+
+        <form action="{{ url_for('one_way_detection') }}" method="post" enctype="multipart/form-data">
+            
+            <input id="file-upload" type="file" name="file" required onchange="previewImage(event)">
+            <button type="submit">🔍 Detect</button>
+        </form>
+          
+
+        <!-- Image Preview Before Upload -->
+        <div class="preview">
+            <img id="preview-img" src="" alt="Image Preview">
+        </div>
+
+        
+        <div class="result">
+            <h2>Result:</h2>
+            <p class="message">objects detected</p>
+            <img src="{{ url_for('static', filename='uploads/' + result_image) }}" alt="Detected Image">
+        </div>
+     </div>
+    
+
+</div>
+
+    <script>
+        function previewImage(event) {
+            const preview = document.getElementById("preview-img");
+            preview.src = URL.createObjectURL(event.target.files[0]);
+            preview.style.display = "block";
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helmet Detection</title>
+   
+
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            width: 100%;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .navbar .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Content Styling */
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-top: 80px; /* Below navbar */
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h3 {
+            margin: 15px 0;
+            color: #555;
+        }
+
+        /* Form Styling */
+        input[type="file"] {
+            display: block;
+            margin: 15px auto;
+            padding: 10px;
+            border: 2px dashed #928dab;
+            border-radius: 5px;
+            background: #f9f9f9;
+            cursor: pointer;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Detected Image */
+        .detected-image {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .detection-message {
+            font-size: 18px;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById("imagePreview");
+                output.src = reader.result;
+                output.style.display = "block";
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">🚦 Smart Violation System</div>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/history">📜 History</a>
+            <a href="/settings">⚙️ Settings</a>
+            <a href="login.html">🔒 Logout</a>
+        </div>
+    </div>
+
+
+    <!-- Helmet Detection Form -->
+    <div class="container">
+    <h1>Helmet Detection System</h1>
+    <h3>Upload an image for detection:</h3>
+
+    <form onsubmit="upload(event)">
+      <input type="file" id="imageInput" name="file" accept="image/*" required onchange="previewImage(event)">
+      <img id="imagePreview" style="display: none; max-width: 100%; margin-top: 10px;" alt="Image Preview">
+      <button type="submit">Upload & Detect</button>
+    </form>
+
+    <h2>Detected Image</h2>
+    <img id="output" class="detected-image" />
+    <p class="detection-message">Upload an image to start.</p>
+  </div>
+    <script>
+    function previewImage(event) {
+      const reader = new FileReader();
+      reader.onload = function() {
+        const output = document.getElementById("imagePreview");
+        output.src = reader.result;
+        output.style.display = "block";
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    async function upload(event) {
+      event.preventDefault(); // stop form refresh
+      const file = document.getElementById("imageInput").files[0];
+      if (!file) {
+        alert("Please choose an image first!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      document.querySelector(".detection-message").innerText = "Detecting... ⏳";
+
+      const res = await fetch("/detect", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      // Show annotated image
+      document.getElementById("output").src = "data:image/jpeg;base64," + data.image;
+
+      // Show detection message
+      if (data.detections.length > 0) {
+        const classes = [...new Set(data.detections.map(d => d.class))];
+        document.querySelector(".detection-message").innerText = 
+          "Detected: " + classes.join(", ");
+      } else {
+        document.querySelector(".detection-message").innerText = 
+          "No helmets or persons detected 😕";
+      }
+    }
+  </script>
+
+</body>
+</html>
